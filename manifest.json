@@ -6,5 +6,7 @@
   "UniqueID": "Siweipancc.Instantanimals",
   "EntryDll": "InstantAnimals.dll",
   "MinimumApiVersion": "4.0.4",
-  "UpdateKeys": []
+  "UpdateKeys": [
+    "Nexus:21798"
+  ]
 }
