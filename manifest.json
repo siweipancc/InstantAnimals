@@ -1,10 +1,10 @@
 ﻿{
-  "Name": "Instant Animals",
-  "Author": "pinocchio1231",
-  "Version": "1.0.0",
-  "Description": "Instantly add animals from farm",
-  "UniqueID": "pinocchio1231.instantanimals",
+  "Name": "Instant Animals 1.6",
+  "Author": "pinocchio1231/Siweipancc",
+  "Version": "2.0.0",
+  "Description": "Instantly add animals from farm , 1.6 fix",
+  "UniqueID": "Siweipancc.Instantanimals",
   "EntryDll": "InstantAnimals.dll",
-  "MinimumApiVersion": "3.0.0",
+  "MinimumApiVersion": "4.0.4",
   "UpdateKeys": []
 }

@@ -1,8 +1,0 @@
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\bin\Debug\InstantAnimals.dll
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\bin\Debug\InstantAnimals.pdb
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\obj\Debug\InstantAnimals.csproj.CoreCompileInputs.cache
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\obj\Debug\InstantAnimals.dll
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\obj\Debug\InstantAnimals.pdb
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\bin\Debug\System.ValueTuple.dll
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\bin\Debug\System.ValueTuple.xml
-C:\Users\thoiw\Documents\Github\InstantAnimals\InstantAnimals\obj\Debug\InstantAnimals.csproj.CopyComplete

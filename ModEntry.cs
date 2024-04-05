@@ -1,199 +1,159 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using System.Collections.Generic;
+using GenericModConfigMenu;
+using InstantAnimals.wrapper;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
-using StardewValley.Locations;
-using StardewValley.Menus;
+using StardewValley.GameData.FarmAnimals;
+using SObject = StardewValley.Object;
 
 namespace InstantAnimals
 {
     /// <summary>The mod entry point.</summary>
+    // ReSharper disable once UnusedType.Global
     public class ModEntry : Mod
     {
-        /*********
-        ** Public methods
-        *********/
-        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
-        /// <param name="helper">Provides simplified APIs for writing mods.</param>        
-        private ModConfig config;
-		public static bool adults;
-		public static InstantPurchaseAnimalsMenu purchaseMenu;
-		public static bool seen;
+        private ModConfig _config = new();
+        private bool _adults = true;
+        private SButton _button;
+
+        private static InstantPurchaseAnimalsMenu? _purchaseMenu;
+        private const string EventId = "3900074";
+        private static bool _seen;
+
+
         public override void Entry(IModHelper helper)
         {
-            config = helper.ReadConfig<ModConfig>();
+            Logger.Initialize(Monitor);
+            _config = helper.ReadConfig<ModConfig>();
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-			helper.Events.Display.MenuChanged += this.MenuChange;
-			adults = config.BuyAdultLivestock;
-		}
-
-		/*********
-        ** Private methods
-        *********/
-		/// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-		/// <param name="sender">The event sender.</param>
-		/// <param name="e">The event data.</param>
-		private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-			// ignore if player hasn't loaded a save yet
-			if (!Context.IsWorldReady)
-                return;
-
-            // Open animal buy menu
-            if (Game1.activeClickableMenu == null && e.Button == config.ToggleInstantBuyMenuButton && Game1.currentLocation is Farm)
-            {
-                this.Monitor.Log($"Animal buy menu toggled", LogLevel.Debug);
-				seen = Game1.player.eventsSeen.Contains(3900074);
-				if (!seen)
-                {
-					Game1.player.eventsSeen.Add(3900074);
-				}
-				purchaseMenu = new InstantPurchaseAnimalsMenu(getPurchaseAnimalStock(), adults);
-				Game1.activeClickableMenu = (IClickableMenu)purchaseMenu;
-			}
-			else if (Game1.activeClickableMenu is InstantPurchaseAnimalsMenu && e.Button == config.ToggleInstantBuyMenuButton)
-            {
-				adults = !adults;
-				purchaseMenu.setAdult(adults);
-				purchaseMenu.reloadStock(getPurchaseAnimalStock());
-			}
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.Display.MenuChanged += MenuChange;
+            _button = _config.ToggleInstantBuyMenuButton;
         }
 
-		private void MenuChange(object sender, MenuChangedEventArgs e)
+        private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
-			// ignore if player hasn't loaded a save yet
-			if (!Context.IsWorldReady)
-				return;
-			if (e.OldMenu is InstantPurchaseAnimalsMenu && !(e.NewMenu is InstantPurchaseAnimalsMenu))
+            // get Generic Mod Config Menu's API (if it's installed)
+            var configMenu =
+                this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            if (configMenu is null)
             {
-				if (!seen)
-				{
-					Game1.player.eventsSeen.Remove(3900074);
-				}
-			}
-		}
+                return;
+            }
 
-		public (List<StardewValley.Object>, IDictionary<string, string>, IDictionary<string, Texture2D>, IDictionary<string, string>) getPurchaseAnimalStock()
-		{
-			List<StardewValley.Object> list = new List<StardewValley.Object>();
-			IDictionary<string, string> strings = this.Helper.Content.Load<IDictionary<string, string>>("Strings/StringsFromCSFiles", ContentSource.GameContent);
-			StardewValley.Object o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 400 : 0)
-			{
-				Name = "White Chicken",
-				Type = null,
-				displayName = strings["Utility.cs.5922"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 400 : 0)
-			{
-				Name = "Brown Chicken",
-				Type = null,
-				displayName = strings["Utility.cs.5922"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 400 : 0)
-			{
-				Name = "Blue Chicken",
-				Type = null,
-				displayName = strings["Utility.cs.5922"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 400 : 0)
-			{
-				Name = "Void Chicken",
-				Type = null,
-				displayName = strings["Utility.cs.5922"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 400 : 0)
-			{
-				Name = "Golden Chicken",
-				Type = null,
-				displayName = strings["Utility.cs.5922"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 750 : 0)
-			{
-				Name = "White Cow",
-				Type = null,
-				displayName = strings["Utility.cs.5927"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 750 : 0)
-			{
-				Name = "Brown Cow",
-				Type = null,
-				displayName = strings["Utility.cs.5927"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 2000 : 0)
-			{
-				Name = "Goat",
-				Type = null,
-				displayName = strings["Utility.cs.5933"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 600 : 0)
-			{
-				Name = "Duck",
-				Type = null,
-				displayName = strings["Utility.cs.5937"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 4000 : 0)
-			{
-				Name = "Sheep",
-				Type = null,
-				displayName = strings["Utility.cs.5942"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 4000 : 0)
-			{
-				Name = "Rabbit",
-				Type = null,
-				displayName = strings["Utility.cs.5945"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 8000 : 0)
-			{
-				Name = "Pig",
-				Type = null,
-				displayName = strings["Utility.cs.5948"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 500 : 0)
-			{
-				Name = "Ostrich",
-				Type = null,
-				displayName = strings["Ostrich_Name"]
-			};
-			list.Add(o);
-			o = new StardewValley.Object(100, 1, isRecipe: false, config.BuyUsesResources ? 500 : 0)
-			{
-				Name = "Dinosaur",
-				Type = null,
-				displayName = "Dinosaur"
-			};
-			list.Add(o);
+            configMenu.Register(
+                mod: this.ModManifest,
+                reset: () => this._config = new ModConfig(),
+                save: () => this.Helper.WriteConfig(this._config)
+            );
+            configMenu.AddBoolOption(
+                mod: this.ModManifest,
+                name: () => "BuyUsesResources",
+                tooltip: () => "Indicates if animals should cost their usual resources.",
+                getValue: () => this._config.BuyUsesResources,
+                setValue: value => this._config.BuyUsesResources = value
+            );
+            configMenu.AddKeybind(
+                mod: this.ModManifest,
+                name: () => "ToggleInstantBuyMenuButton",
+                tooltip: () => "Button to open and close the Instant Animals menu.",
+                getValue: () => this._config.ToggleInstantBuyMenuButton,
+                setValue: value =>
+                {
+                    this._config.ToggleInstantBuyMenuButton = value;
+                    this._button = value;
+                }
+            );
+        }
 
-			IDictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
-			foreach (StardewValley.Object obj in list)
+        /*********
+         ** Private methods
+         *********/
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
+        {
+            if (!Context.IsWorldReady)
             {
-				string textureName = obj.Name;
-				if (!obj.Name.Equals("Dinosaur") && !adults)
-				{
-					textureName = "baby" + obj.Name;
-				}
-				textures.Add(obj.Name, Helper.Content.Load<Texture2D>("Animals/" + (textureName.Equals("babyDuck") ? "babyWhite Chicken" : textureName), ContentSource.GameContent));
-			}
+                return;
+            }
 
-			IDictionary<string, string> data = this.Helper.Content.Load<IDictionary<string, string>>("Data/FarmAnimals", ContentSource.GameContent);
+            // Open animal buy menu
+            if (Game1.activeClickableMenu == null && e.Button == _config.ToggleInstantBuyMenuButton &&
+                Game1.currentLocation is Farm)
+            {
+                this.Monitor.Log("Animal buy menu toggled", LogLevel.Debug);
+                _seen = Game1.player.eventsSeen.Contains(EventId);
+                if (!_seen)
+                {
+                    Game1.player.eventsSeen.Add(EventId);
+                }
 
-			return (list, strings, textures, data);
-		}
-	}
+                _purchaseMenu = new InstantPurchaseAnimalsMenu(GetPurchaseAnimalStock(), Helper);
+                Game1.activeClickableMenu = _purchaseMenu;
+            }
+            // or change to baby
+            else if (Game1.activeClickableMenu is InstantPurchaseAnimalsMenu ipm &&
+                     e.Button == _button)
+            {
+                _adults = !_adults;
+                ipm.SetAdult(_adults);
+            }
+        }
+
+        private static void MenuChange(object? sender, MenuChangedEventArgs e)
+        {
+            if (!Context.IsWorldReady)
+            {
+                return;
+            }
+
+            if (e.OldMenu is not InstantPurchaseAnimalsMenu || e.NewMenu is InstantPurchaseAnimalsMenu)
+            {
+                return;
+            }
+
+            if (!_seen)
+            {
+                Game1.player.eventsSeen.Remove(EventId);
+            }
+        }
+
+        /// <summary>
+        /// 从 FarmAnimals 派生所有可用的农场生物. 1.6 版本为 :
+        /// ["WhiteChicken","BrownChicken","BlueChicken","VoidChicken","GoldenChicken","Duck","Rabbit","Dinosaur","WhiteCow","BrownCow","Goat","Sheep","Pig","Ostrich"]
+        ///
+        ///
+        /// 可以加载 mod 生物.
+        /// </summary>
+        /// <returns></returns>
+        private (List<SObject>, IDictionary<string, string>,
+            IDictionary<string, FarmAnimalData>)
+            GetPurchaseAnimalStock()
+        {
+            List<SObject> list = new List<SObject>();
+            IDictionary<string, string> strings =
+                this.Helper.GameContent.Load<IDictionary<string, string>>("Strings/StringsFromCSFiles");
+            IDictionary<string, FarmAnimalData> dictionary =
+                this.Helper.GameContent.Load<IDictionary<string, FarmAnimalData>>("Data/FarmAnimals");
+            Logger.Info(
+                $"load {dictionary.Count} animals from Data/FarmAnimals: [{string.Join(',', dictionary.Keys)}]");
+            foreach (var (key, value) in dictionary)
+            {
+                var price = _config.BuyUsesResources ? value.SellPrice : 0;
+                SObject o = new SObject("100", 1, isRecipe: false, price)
+                {
+                    Name = key,
+                    displayName = value.DisplayName,
+                    Type = null
+                };
+                list.Add(o);
+            }
+
+
+            return (list, strings, dictionary);
+        }
+    }
 }
